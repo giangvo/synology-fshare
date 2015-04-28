@@ -25,8 +25,8 @@ class SynoFileHostingFshareVN {
         $this->Username = $Username;
         $this->Password = $Password;
 
-        $this->Username = "zang_itu@yahoo.com";
-        $this->Password = "asd123";
+        /*$this->Username = "zang_itu@yahoo.com";
+        $this->Password = "asd123";*/
 
         $this->AppId = "GUxft6Beh3Bf8qKP7GC2IplYJZz1A53JQfRwne0R";
 
@@ -38,14 +38,14 @@ class SynoFileHostingFshareVN {
     public function Verify($ClearCookie) {
         if(file_exists($this->COOKIE_JAR)) {
             unlink($this->COOKIE_JAR);
-            $this->COOKIE_JAR = tempnam('/tmp','cookie');
         }
             
         return $this->performLogin();
     }
     
     public function GetDownloadInfo() {
-        
+        $this->Verify(FALSE);
+
         $DownloadInfo = array();
 
         $downloadUrl = $this->getLink();
@@ -58,9 +58,6 @@ class SynoFileHostingFshareVN {
             $DownloadInfo[DOWNLOAD_URL] = $downloadUrl;
         }
 
-        echo "====";
-        echo $DownloadInfo;
-        
         return $DownloadInfo;
 
     }
@@ -94,18 +91,20 @@ class SynoFileHostingFshareVN {
             echo "login error: " . curl_error($curl);
 
             curl_close($curl);
-            return FALSE;
+            return LOGIN_FAIL;
         }
         else
         {
             $this->Token = json_decode($curl_response)->{'token'};
-            
+
             curl_close($curl);
-            return TRUE;
+            return USER_IS_PREMIUM;;
         }
+
     }
 
     private function getLink() {
+
         $service_url = 'https://api2.fshare.vn/api/session/download';
 
         $curl = curl_init($service_url);
@@ -117,6 +116,7 @@ class SynoFileHostingFshareVN {
         );
 
         $data_string = json_encode($data);
+
 
         curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "POST");
         curl_setopt($curl, CURLOPT_POSTFIELDS, $data_string);
@@ -132,7 +132,6 @@ class SynoFileHostingFshareVN {
 
         if($curl_response === false)
         {
-            echo "get link error: " . curl_error($curl);
             
             curl_close($curl);
             return "error";
@@ -140,11 +139,11 @@ class SynoFileHostingFshareVN {
         else
         {
             $downloadUrl = json_decode($curl_response)->{'location'};
-            echo $downloadUrl;
 
             curl_close($curl);
             return $downloadUrl;
         }
+
     }
 }
 
