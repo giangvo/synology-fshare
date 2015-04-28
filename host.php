@@ -13,21 +13,21 @@ class SynoFileHostingFshareVN {
     private $FSHARE_URL = 'https://www.fshare.vn';
     
     public function __construct($Url, $Username, $Password, $HostInfo) {
-        /*if(strpos($Url,'http://') !== FALSE){
+        if(strpos($Url,'http://') !== FALSE){
             $Url = str_replace("http://", "https://", $Url);
         }else{
             if(strpos($Url,'https://') === FALSE){
                 $Url = "https://" . $Url;
             }
-        }*/
+        }
 
-        /*$this->Url = $Url;
+        $this->Url = $Url;
         $this->Username = $Username;
-        $this->Password = $Password;*/
+        $this->Password = $Password;
 
-        $this->Url = "https://www.fshare.vn/file/BA7TDZNZQHUL";
         $this->Username = "zang_itu@yahoo.com";
         $this->Password = "asd123";
+
         $this->AppId = "GUxft6Beh3Bf8qKP7GC2IplYJZz1A53JQfRwne0R";
 
         $this->HostInfo = $HostInfo;
@@ -148,12 +148,12 @@ class SynoFileHostingFshareVN {
     }
 }
 
-$url = "https://www.fshare.vn/file/BA7TDZNZQHUL";
+/*$url = "https://www.fshare.vn/file/BA7TDZNZQHUL";
 $username = "zang_itu@yahoo.com";
 $password = "asd123";
 
 $client = new SynoFileHostingFshareVN($url, $username, $password, NULL);
 $client->Verify(FALSE);
-$client->GetDownloadInfo(FALSE);
+$client->GetDownloadInfo(FALSE);*/
 
 ?>
