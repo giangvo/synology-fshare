@@ -1,0 +1,10 @@
+{
+	"name": "fsharevn",
+	"hostprefix": "fshare.vn",
+	"displayname": "fshare.vn",
+	"version": "1.2",
+	"authentication": "yes",
+	"module": "host.php",
+	"class": "SynoFileHostingFshareVN",
+	"description": "Premium, Free or No Account Supported."
+}
