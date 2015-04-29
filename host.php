@@ -40,6 +40,8 @@ class SynoFileHostingFshareVN {
     }
     
     public function GetDownloadInfo() {
+        $DownloadInfo = array();
+
         $this->logInfo("Start getting download info");
 
         $needLogin = FALSE;
@@ -62,15 +64,25 @@ class SynoFileHostingFshareVN {
                 $DownloadInfo[DOWNLOAD_ERROR] = "Login fail!";
                 return $DownloadInfo;
             }    
-
         }
-
-        $DownloadInfo = array();
 
         $downloadUrl = $this->getLink();
         
         if(empty($downloadUrl) || $downloadUrl === "error") {
-            $DownloadInfo[DOWNLOAD_ERROR] = $downloadUrl;   
+            
+            // get link may fail due to use expired token / cookie
+            // => login and retry once
+            if(!$needLogin) {
+                $this->logInfo("Token/Cookie is expired. Login and try once");
+                if($this->Verify(FALSE) === LOGIN_FAIL) {
+                    $DownloadInfo[DOWNLOAD_ERROR] = "Login fail!";
+                    return $DownloadInfo;
+                }
+
+                $downloadUrl = $this->getLink();        
+            }
+
+            $DownloadInfo[DOWNLOAD_ERROR] = "Get link fail";   
         }
         else
         {
