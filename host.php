@@ -8,6 +8,7 @@ class SynoFileHostingFshareVN {
     private $Password;
     private $HostInfo;
     private $COOKIE_JAR = '/tmp/fsharevn.cookie';
+    private $LOG_FILE = '/tmp/fsharevn.log';
     private $LOGIN_URL = 'https://www.fshare.vn/login';
     private $FSHARE_HOME = 'https://www.fshare.vn/home';
     private $FSHARE_URL = 'https://www.fshare.vn';
@@ -65,8 +66,7 @@ class SynoFileHostingFshareVN {
     private function performLogin() {
         $ret = LOGIN_FAIL;
 
-        $myfile = fopen("/tmp/fsharevn.log", "a");
-        fwrite($myfile, date('Y-m-d H:i:s') . " - Start login===\n");
+        $this->logInfo("Start login===");
 
         $service_url = 'https://api2.fshare.vn/api/user/login';
         $curl = curl_init($service_url);
@@ -92,18 +92,17 @@ class SynoFileHostingFshareVN {
 
         if($curl_response === false)
         {
-            fwrite($myfile, date('Y-m-d H:i:s') . " - Login error: " . curl_error($curl) . "\n");
+            $this->logError("Login error: " . curl_error($curl));
         }
         else
         {
             $this->Token = json_decode($curl_response)->{'token'};
-            fwrite($myfile, date('Y-m-d H:i:s') . " - Login ok: " . $curl_response . "\n");
+            $this->logInfo("Login ok: " . $curl_response);
     
             $ret = USER_IS_PREMIUM;;
         }
 
-        fwrite($myfile, date('Y-m-d H:i:s') . " - End login===\n");
-        fclose($myfile);
+        $this->logInfo("End login===");
 
         curl_close($curl);
 
@@ -115,8 +114,7 @@ class SynoFileHostingFshareVN {
 
         $ret = "error";
 
-        $myfile = fopen("/tmp/fsharevn.log", "a");
-        fwrite($myfile, date('Y-m-d H:i:s') . " - Start get link: " . $this->Url ."===\n");
+        $this->logInfo("Start Get Link: " . $this->Url . " ===");
 
         $service_url = 'https://api2.fshare.vn/api/session/download';
 
@@ -145,23 +143,34 @@ class SynoFileHostingFshareVN {
 
         if($curl_response === false)
         {
-            fwrite($myfile, date('Y-m-d H:i:s') . " - Get link error: " . curl_error($curl) . "\n");
+            $this->logError("Login error: " . curl_error($curl));
         }
         else
         {
             $downloadUrl = json_decode($curl_response)->{'location'};
 
-            fwrite($myfile, date('Y-m-d H:i:s') . " - Get link ok: " . $curl_response . "\n");
+            $this->logInfo("Get link ok: " . $curl_response);
 
             $ret = $downloadUrl;
         }
 
-        fwrite($myfile, date('Y-m-d H:i:s') . " - End get link: " . $this->Url ."===\n");
-        fclose($myfile);
+        $this->logInfo("End Get Link ===");
 
         curl_close($curl);
 
         return $ret;
+    }
+
+    private function logError($msg) {
+        $this->log("[ERROR]", $msg);
+    }
+
+    private function logInfo($msg) {
+        $this->log("[INFO]", $msg);
+    }
+
+    private function log($prefix, $msg) {
+        error_log($prefix . " - " . date('Y-m-d H:i:s') . " - " . $msg . "\n", 3, $this->LOG_FILE);
     }
 }
 
@@ -170,7 +179,7 @@ $username = "zang_itu@yahoo.com";
 $password = "asd123";
 
 $client = new SynoFileHostingFshareVN($url, $username, $password, NULL);
-$client->Verify(FALSE);
-$client->GetDownloadInfo(FALSE);*/
+$client->GetDownloadInfo();
+echo "DONE";*/
 
 ?>
