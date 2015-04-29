@@ -9,9 +9,7 @@ class SynoFileHostingFshareVN {
     private $HostInfo;
     private $COOKIE_JAR = '/tmp/fsharevn.cookie';
     private $LOG_FILE = '/tmp/fsharevn.log';
-    private $LOGIN_URL = 'https://www.fshare.vn/login';
-    private $FSHARE_HOME = 'https://www.fshare.vn/home';
-    private $FSHARE_URL = 'https://www.fshare.vn';
+    private $TOKEN_FILE = '/tmp/fsharevn.token';
     
     public function __construct($Url, $Username, $Password, $HostInfo) {
         if(strpos($Url,'http://') !== FALSE){
@@ -45,19 +43,44 @@ class SynoFileHostingFshareVN {
     }
     
     public function GetDownloadInfo() {
-        $this->Verify(FALSE);
+        $this->logInfo("Start getting download info");
+
+        $needLogin = FALSE;
+        $this->logInfo("Checking if need to re-login");
+        
+        $this->Token = $this->getToken();
+        if(empty($this->Token)) {
+            $this->logInfo("Token is empty => need to login to get token");
+            $needLogin = TRUE;
+        }
+        
+        if(!file_exists($this->COOKIE_JAR)) {
+            $this->logInfo("Cookie file is not existed => need to login to get cookie");
+            $needLogin = TRUE;
+        }
+
+        if($needLogin) {
+            // login to get authentication info
+            if($this->Verify(FALSE) === LOGIN_FAIL) {
+                $DownloadInfo[DOWNLOAD_ERROR] = "Login fail!";
+                return $DownloadInfo;
+            }    
+
+        }
 
         $DownloadInfo = array();
 
         $downloadUrl = $this->getLink();
         
-        if($downloadUrl === "error") {
+        if(empty($downloadUrl) || $downloadUrl === "error") {
             $DownloadInfo[DOWNLOAD_ERROR] = $downloadUrl;   
         }
         else
         {
             $DownloadInfo[DOWNLOAD_URL] = $downloadUrl;
         }
+
+        $this->logInfo("End getting download info");
 
         return $DownloadInfo;
 
@@ -66,7 +89,7 @@ class SynoFileHostingFshareVN {
     private function performLogin() {
         $ret = LOGIN_FAIL;
 
-        $this->logInfo("Start login===");
+        $this->logInfo("Start login");
 
         $service_url = 'https://api2.fshare.vn/api/user/login';
         $curl = curl_init($service_url);
@@ -90,19 +113,21 @@ class SynoFileHostingFshareVN {
         
         $curl_response = curl_exec($curl);
 
-        if($curl_response === false)
+        if(!$this->isOK($curl, $curl_response))
         {
             $this->logError("Login error: " . curl_error($curl));
         }
         else
         {
             $this->Token = json_decode($curl_response)->{'token'};
-            $this->logInfo("Login ok: " . $curl_response);
+            // save token to disk
+            $this->saveToken($this->Token); 
+            $this->logInfo("Login ok");
     
-            $ret = USER_IS_PREMIUM;;
+            $ret = USER_IS_PREMIUM;
         }
 
-        $this->logInfo("End login===");
+        $this->logInfo("End login");
 
         curl_close($curl);
 
@@ -114,7 +139,7 @@ class SynoFileHostingFshareVN {
 
         $ret = "error";
 
-        $this->logInfo("Start Get Link: " . $this->Url . " ===");
+        $this->logInfo("Start Get Link: " . $this->Url);
 
         $service_url = 'https://api2.fshare.vn/api/session/download';
 
@@ -141,20 +166,20 @@ class SynoFileHostingFshareVN {
         
         $curl_response = curl_exec($curl);
 
-        if($curl_response === false)
+        if(!$this->isOK($curl, $curl_response))
         {
-            $this->logError("Login error: " . curl_error($curl));
+            $this->logError("Get link error: " . curl_error($curl));
         }
         else
         {
             $downloadUrl = json_decode($curl_response)->{'location'};
 
-            $this->logInfo("Get link ok: " . $curl_response);
+            $this->logInfo("Get link ok");
 
             $ret = $downloadUrl;
         }
 
-        $this->logInfo("End Get Link ===");
+        $this->logInfo("End Get Link");
 
         curl_close($curl);
 
@@ -172,6 +197,50 @@ class SynoFileHostingFshareVN {
     private function log($prefix, $msg) {
         error_log($prefix . " - " . date('Y-m-d H:i:s') . " - " . $msg . "\n", 3, $this->LOG_FILE);
     }
+
+    private function saveToken($token) {
+        $myfile = fopen($this->TOKEN_FILE, "w");
+        fwrite($myfile, $token);
+        fclose($myfile);
+    }
+
+
+    private function getToken() {
+        if(file_exists($this->COOKIE_JAR)) {
+            $myfile = fopen($this->TOKEN_FILE, "r");
+            $token = fgets($myfile);
+            fclose($myfile);
+            return $token;
+        }
+        else
+        {
+            return "";
+        }
+    }
+
+    private function isOK($curl, $curl_response) {
+        $this->logInfo("HTTP Response: " . $curl_response);
+        
+        if($curl_response === false) {
+            return false;
+        }
+
+        $info = curl_getinfo($curl);
+        $this->logInfo("HTTP CODE: " . $info['http_code']);
+        if($info['http_code'] !== 200) {
+            return false;
+        }
+
+        $code = json_decode($curl_response)->{'code'};
+        $this->logInfo("CODE: " .$code);
+        if( !empty($code) && $code !== 200) {
+            return false;
+        }
+
+        return true;
+    }
+
+
 }
 
 /*$url = "https://www.fshare.vn/file/BA7TDZNZQHUL";
