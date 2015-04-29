@@ -63,7 +63,11 @@ class SynoFileHostingFshareVN {
     }
     
     private function performLogin() {
-    
+        $ret = LOGIN_FAIL;
+
+        $myfile = fopen("/tmp/fsharevn.log", "a");
+        fwrite($myfile, date('Y-m-d H:i:s') . " - Start login===\n");
+
         $service_url = 'https://api2.fshare.vn/api/user/login';
         $curl = curl_init($service_url);
         $data = array(
@@ -88,22 +92,32 @@ class SynoFileHostingFshareVN {
 
         if($curl_response === false)
         {
-            echo "login error: " . curl_error($curl);
-
-            curl_close($curl);
-            return LOGIN_FAIL;
+            fwrite($myfile, date('Y-m-d H:i:s') . " - Login error: " . curl_error($curl) . "\n");
         }
         else
         {
-            $this->Token = json_decode($curl_response)->{'token'};
-
-            curl_close($curl);
-            return USER_IS_PREMIUM;;
+            $resp = json_decode($curl_response);
+            $this->Token = $resp->{'token'};
+            fwrite($myfile, date('Y-m-d H:i:s') . " - Login ok: " . $resp . "\n");
+    
+            $ret = USER_IS_PREMIUM;;
         }
 
+        fwrite($myfile, date('Y-m-d H:i:s') . " - End login===\n");
+        fclose($myfile);
+
+        curl_close($curl);
+
+        return $ret;
+        
     }
 
     private function getLink() {
+
+        $ret = "error";
+
+        $myfile = fopen("/tmp/fsharevn.log", "a");
+        fwrite($myfile, date('Y-m-d H:i:s') . " - Start get link: " . $this->Url ."===\n");
 
         $service_url = 'https://api2.fshare.vn/api/session/download';
 
@@ -132,18 +146,24 @@ class SynoFileHostingFshareVN {
 
         if($curl_response === false)
         {
-            
-            curl_close($curl);
-            return "error";
+            fwrite($myfile, date('Y-m-d H:i:s') . " - Get link error: " . curl_error($curl) . "\n");
         }
         else
         {
-            $downloadUrl = json_decode($curl_response)->{'location'};
+            $resp = json_decode($curl_response);
+            $downloadUrl = $resp->{'location'};
 
-            curl_close($curl);
-            return $downloadUrl;
+            fwrite($myfile, date('Y-m-d H:i:s') . " - Get link ok: " . $resp . "\n");
+
+            $ret = $downloadUrl;
         }
 
+        fwrite($myfile, date('Y-m-d H:i:s') . " - End get link: " . $this->Url ."===\n");
+        fclose($myfile);
+
+        curl_close($curl);
+
+        return $ret;
     }
 }
 
