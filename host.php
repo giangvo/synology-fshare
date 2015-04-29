@@ -24,9 +24,6 @@ class SynoFileHostingFshareVN {
         $this->Username = $Username;
         $this->Password = $Password;
 
-        /*$this->Username = "zang_itu@yahoo.com";
-        $this->Password = "asd123";*/
-
         $this->AppId = "GUxft6Beh3Bf8qKP7GC2IplYJZz1A53JQfRwne0R";
 
         $this->HostInfo = $HostInfo;
