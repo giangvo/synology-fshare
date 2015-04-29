@@ -96,9 +96,8 @@ class SynoFileHostingFshareVN {
         }
         else
         {
-            $resp = json_decode($curl_response);
-            $this->Token = $resp->{'token'};
-            fwrite($myfile, date('Y-m-d H:i:s') . " - Login ok: " . $resp . "\n");
+            $this->Token = json_decode($curl_response)->{'token'};
+            fwrite($myfile, date('Y-m-d H:i:s') . " - Login ok: " . $curl_response . "\n");
     
             $ret = USER_IS_PREMIUM;;
         }
@@ -150,10 +149,9 @@ class SynoFileHostingFshareVN {
         }
         else
         {
-            $resp = json_decode($curl_response);
-            $downloadUrl = $resp->{'location'};
+            $downloadUrl = json_decode($curl_response)->{'location'};
 
-            fwrite($myfile, date('Y-m-d H:i:s') . " - Get link ok: " . $resp . "\n");
+            fwrite($myfile, date('Y-m-d H:i:s') . " - Get link ok: " . $curl_response . "\n");
 
             $ret = $downloadUrl;
         }
