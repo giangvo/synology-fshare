@@ -116,6 +116,7 @@ class SynoFileHostingFshareVN {
         curl_setopt($curl, CURLOPT_COOKIEJAR, $this->COOKIE_JAR);
 
         curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+            "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36",
             "Content-Type: application/json",
             'Content-Length: ' . strlen($data_string)
         ));
@@ -169,6 +170,7 @@ class SynoFileHostingFshareVN {
         curl_setopt($curl, CURLOPT_COOKIEFILE, $this->COOKIE_JAR);
 
         curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+            "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36",
             "Content-Type: application/json",
             'Content-Length: ' . strlen($data_string)
         ));
